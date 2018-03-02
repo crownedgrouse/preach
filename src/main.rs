@@ -1,7 +1,7 @@
-#[macro_use]
-extern crate log;
 extern crate env_logger;
 extern crate getopts;
+#[macro_use]
+extern crate log;
 extern crate rand;
 
 use std::env;
@@ -42,25 +42,24 @@ macro_rules! print_err {
 fn encode(inp: &str, out: &str) {
     println!("{:?}", out);
     let spath = Path::new(inp);
-    let s = match File::open(spath){
-        Err(why) => panic!("couldn't open {}: {}", inp,
-                                                   why.description()),
+    let s = match File::open(spath) {
+        Err(why) => panic!("couldn't open {}: {}", inp, why.description()),
         Ok(file) => file,
     };
     let mut rng = rand::thread_rng();
     if rng.gen() {
-      // Read data and encode it
-      for byte in s.bytes() {
-            let b = byte.unwrap() ;
+        // Read data and encode it
+        for byte in s.bytes() {
+            let b = byte.unwrap();
             trace!("Byte : {}", b);
             let e = to_phi(b, rng.gen::<i32>());
             println!("{:?}", e);
-      }
+        }
     }
 }
 
 fn decode(inp: &str, out: &str) {
-    println!("{:?} {:?}",inp, out);
+    println!("{:?} {:?}", inp, out);
     //let spath = Path::new(inp.to_slice());
     //let mut s = File::open(spath)?;
 }
@@ -87,36 +86,35 @@ fn main() {
     opts.optopt("i", "", "set input file name, or - for stdin", "SOURCE");
     opts.optopt("o", "", "set output file name, or - for stdout", "TARGET");
     let matches = match opts.parse(&args[1..]) {
-        Ok(m) => { m }
-        Err(f) => { panic!(f.to_string()) }
+        Ok(m) => m,
+        Err(f) => panic!(f.to_string()),
     };
     if matches.opt_present("h") {
         print_usage(&program, opts);
         process::exit(0);
     }
     // Must encode or decode
-   if ! matches.opt_present("e") && ! matches.opt_present("d"){
+    if !matches.opt_present("e") && !matches.opt_present("d") {
         error!("Missing mandatory option -e or -d");
         process::exit(1);
     }
     // Input is a file or stdin
-    if ! matches.opt_present("i") {
+    if !matches.opt_present("i") {
         error!("Missing mandatory option -i");
         process::exit(1);
     }
     // Ouptut is a file or stdout
-    if ! matches.opt_present("o") {
+    if !matches.opt_present("o") {
         error!("Missing mandatory option -o");
         process::exit(1);
     }
 
-    let input  = matches.opt_strs("i");
+    let input = matches.opt_strs("i");
     let output = matches.opt_strs("o");
 
-   if matches.opt_present("e") {
-      encode(&input[0], &output[0]);
-   }else if matches.opt_present("d") {
-      decode(&input[0], &output[0]);
-   }
+    if matches.opt_present("e") {
+        encode(&input[0], &output[0]);
+    } else if matches.opt_present("d") {
+        decode(&input[0], &output[0]);
+    }
 }
-
