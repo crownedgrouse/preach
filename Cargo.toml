@@ -1,7 +1,7 @@
 [package]
 name = "preach"
 version = "0.1.0"
-authors = ["Eric PAILLEAU <eric@pailleau.org>"]
+authors = ["Eric PAILLEAU <preach@crownedgrouse.com>"]
 
 [dependencies]
 rand = "0.4"
