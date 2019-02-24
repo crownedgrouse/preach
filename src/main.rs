@@ -1,19 +1,22 @@
-extern crate env_logger;
-extern crate getopts;
 #[macro_use]
 extern crate log;
 extern crate rand;
+extern crate env_logger;
+extern crate getopts;
 
 use std::env;
 use std::error::Error;
 use std::process;
-//use std::io;
+use std::io;
 use std::io::prelude::*;
+use std::io::stdout;
+use std::fs;
 use std::fs::File;
 use std::path::Path;
 use rand::Rng;
 //use log::Level;
 use getopts::Options;
+
 
 mod encode;
 use encode::to_phi;
@@ -39,29 +42,29 @@ macro_rules! print_err {
 */
 
 /* Functions */
-fn encode(inp: &str, out: &str) {
-    println!("{:?}", out);
-    let spath = Path::new(inp);
-    let s = match File::open(spath) {
-        Err(why) => panic!("couldn't open {}: {}", inp, why.description()),
-        Ok(file) => file,
-    };
+fn encode(rdr: Box<io::Read>, mut out_writer: Box<Write>) {
+    //println!("{:?}", out);
+    //let mut buffer = File::create(tpath).unwrap();
     let mut rng = rand::thread_rng();
-    if rng.gen() {
+    //if rng.gen() {
         // Read data and encode it
-        for byte in s.bytes() {
+        for byte in rdr.bytes() {
             let b = byte.unwrap();
             trace!("Byte : {}", b);
-            let e = to_phi(b, rng.gen::<i32>());
-            println!("{:?}", e);
+            let e = to_phi(b, rng.gen::<u8>()) ;
+            //println!("{:?}", e);
+            out_writer.write_all(&e).unwrap();
         }
-    }
+   // }
+    drop(out_writer);
 }
 
-fn decode(inp: &str, out: &str) {
-    println!("{:?} {:?}", inp, out);
-    //let spath = Path::new(inp.to_slice());
-    //let mut s = File::open(spath)?;
+fn decode(rdr: Box<io::Read>, mut out_writer: Box<Write>) {
+
+    // Read 3 bytes
+
+    // Match vector to find associated byte
+
 }
 
 fn print_usage(program: &str, opts: Options) {
@@ -112,9 +115,26 @@ fn main() {
     let input = matches.opt_strs("i");
     let output = matches.opt_strs("o");
 
+    let rdr: Box<io::Read> = if &input[0] == "-" {
+        Box::new(io::stdin())
+    } else {
+        let spath = Path::new(&input[0]);
+        match File::open(spath) {
+            Err(why) => panic!("couldn't open {}: {}", &input[0], why.description()),
+            Ok(file) => file,
+        };
+        Box::new(fs::File::open(&input[0]).unwrap())
+    };
+
+    let out_writer: Box<Write> = if &output[0] == "-" {
+        Box::new(stdout()) as Box<Write>
+    }else{
+        Box::new(File::create(&Path::new(&output[0])).unwrap()) as Box<Write>
+    };
+
     if matches.opt_present("e") {
-        encode(&input[0], &output[0]);
+        encode(rdr, out_writer);
     } else if matches.opt_present("d") {
-        decode(&input[0], &output[0]);
+        decode(rdr, out_writer);
     }
 }
