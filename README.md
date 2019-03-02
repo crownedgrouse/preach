@@ -13,7 +13,7 @@ Cryptography is based on the fact that a payload crypted by a symmetric key give
 
 ## Why ?
 
-Attacker can try brut force it he know that a payload is always starting the same, or contain always
+Attacker can try brut force if he know that a payload is always starting the same, or contain always
 same data at a given position.
 With `preach`, attacker cannot know if the payload changed, or key changed, or both.
 Some bytes can be encoded up to 233 different way on three bytes.
